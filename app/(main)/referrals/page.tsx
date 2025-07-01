@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,19 +70,18 @@ export default function ReferralsPage() {
       const result = await sendReferralInvite(inviteEmail);
       const name = currentUser.name;
       const referralCode = currentUser.referralCode;
+      const res = await fetch(`api/sendReferral`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          inviteEmail,
+          referralCode,
+        }),
+      });
       if (result.success && result.invite) {
-        const res = await fetch(`api/sendReferral`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            inviteEmail,
-            referralCode,
-          }),
-        });
-
         const emailTemplate =
           EnhancedBrevoEmailService.createReferralInviteEmail(
             currentUser.name,
@@ -202,6 +201,14 @@ export default function ReferralsPage() {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  // Polling for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      useReferralStore.setState((state) => ({ ...state }));
+    }, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="space-y-6">

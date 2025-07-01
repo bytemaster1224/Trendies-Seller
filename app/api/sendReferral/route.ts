@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     params: {
       name: name,
       code: referralCode,
-      signupUrl: `https://localhost:3000/signup?code=${referralCode}`,
+      signupUrl: `https://localhost:3000/signup?code=${referralCode}&email=${inviteEmail}`,
     },
   };
 
