@@ -159,7 +159,7 @@ export default function ReferralsPage() {
         );
       await emailService.sendEmail(successEmail);
 
-      showNotification("Referral converted! You earned MAD 200! 🎉", "success");
+      showNotification("Referral converted! You earned MAD 500! 🎉", "success");
     }
   };
 
@@ -212,24 +212,11 @@ export default function ReferralsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Notification */}
-      {notification && (
-        <div
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
-            notification.type === "success"
-              ? "bg-green-500 text-white"
-              : "bg-red-500 text-white"
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold text-black">Referrals</h1>
         <p className="text-gray-600 text-sm">
-          Invite friends and earn MAD 200 for each successful referral. Share
+          Invite friends and earn MAD 500 for each successful referral. Share
           your unique code and start earning today!
         </p>
       </div>
@@ -372,7 +359,7 @@ export default function ReferralsPage() {
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-sm text-green-800">
-                Share this link or code with friends. You'll earn MAD 200 for
+                Share this link or code with friends. You'll earn MAD 500 for
                 each successful referral.
               </p>
             </div>
