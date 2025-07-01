@@ -68,6 +68,7 @@ export default function ReferralsPage() {
 
     try {
       const result = await sendReferralInvite(inviteEmail);
+      const name = currentUser.name;
       const referralCode = currentUser.referralCode;
       if (result.success && result.invite) {
         const res = await fetch(`api/sendReferral`, {
@@ -76,6 +77,7 @@ export default function ReferralsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            name,
             inviteEmail,
             referralCode,
           }),
