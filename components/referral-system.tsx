@@ -97,7 +97,7 @@ export function ReferralSystem() {
               </Button>
             </div>
             <p className="text-sm text-gray-600">
-              Share this link with friends. You'll earn MAD 200 for each
+              Share this link with friends. You'll earn MAD 500 for each
               successful referral.
             </p>
           </div>

@@ -3,6 +3,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+type InviteStatus =
+  | "pending"
+  | "verified"
+  | "converted"
+  | "expired"
+  | "blocked";
 export interface ReferralCode {
   id: string;
   code: string;
@@ -20,11 +26,13 @@ export interface ReferralInvite {
   inviterName: string;
   inviterEmail: string;
   inviteeEmail: string;
-  status: "pending" | "verified" | "converted" | "expired";
+  status: InviteStatus;
   sentAt: string;
   verifiedAt?: string;
   convertedAt?: string;
   verificationToken: string;
+  isBlocked?: boolean;
+  blockReason?: string;
   rewards: number;
 }
 
@@ -37,6 +45,7 @@ export interface ReferralUser {
   convertedInvites: number;
   totalRewards: number;
   conversionRate: number;
+  status: "active" | "banned";
 }
 
 export interface AdminReferralStats {
@@ -76,7 +85,11 @@ interface ReferralState {
     totalRewards: number;
     conversionRate: number;
   };
-  getAdminStats: () => AdminReferralStats;
+  blockReferral: (inviteId: string, reason: string) => void;
+  unblockReferral: (inviteId: string) => void;
+  banUser: (userId: string, reason: string) => void;
+  unbanUser: (userId: string) => void;
+  getAdminReferralStats: () => AdminReferralStats;
   updateUserProfile: (updates: Partial<ReferralUser>) => void;
 }
 
@@ -89,6 +102,7 @@ const mockCurrentUser: ReferralUser = {
   convertedInvites: 2,
   totalRewards: 400,
   conversionRate: 40,
+  status: "active",
 };
 
 const mockUsers: ReferralUser[] = [
@@ -102,6 +116,7 @@ const mockUsers: ReferralUser[] = [
     convertedInvites: 5,
     totalRewards: 1000,
     conversionRate: 62.5,
+    status: "active",
   },
   {
     id: "user_3",
@@ -110,8 +125,9 @@ const mockUsers: ReferralUser[] = [
     referralCode: "REF-MIKE2025",
     totalInvites: 3,
     convertedInvites: 1,
-    totalRewards: 200,
+    totalRewards: 500,
     conversionRate: 33.3,
+    status: "active",
   },
 ];
 
@@ -119,6 +135,7 @@ export const useReferralStore = create<ReferralState>()(
   persist(
     (set, get) => ({
       currentUser: mockCurrentUser,
+      allUsers: mockUsers,
       referralCodes: [
         {
           id: "code_1",
@@ -143,7 +160,7 @@ export const useReferralStore = create<ReferralState>()(
           verifiedAt: "2025-01-10T11:00:00Z",
           convertedAt: "2025-01-10T12:00:00Z",
           verificationToken: "token_123",
-          rewards: 200,
+          rewards: 500,
         },
         {
           id: "invite_2",
@@ -158,7 +175,6 @@ export const useReferralStore = create<ReferralState>()(
           rewards: 0,
         },
       ],
-      allUsers: mockUsers,
 
       generateReferralCode: (
         userId: string,
@@ -288,7 +304,7 @@ export const useReferralStore = create<ReferralState>()(
                   ...invite,
                   status: "converted" as const,
                   convertedAt: new Date().toISOString(),
-                  rewards: 200,
+                  rewards: 500,
                 }
               : invite
           );
@@ -305,7 +321,7 @@ export const useReferralStore = create<ReferralState>()(
               ? {
                   ...state.currentUser,
                   convertedInvites: state.currentUser.convertedInvites + 1,
-                  totalRewards: state.currentUser.totalRewards + 200,
+                  totalRewards: state.currentUser.totalRewards + 500,
                   conversionRate:
                     ((state.currentUser.convertedInvites + 1) /
                       state.currentUser.totalInvites) *
@@ -345,24 +361,63 @@ export const useReferralStore = create<ReferralState>()(
         };
       },
 
-      getAdminStats: () => {
-        const { referralCodes, referralInvites, allUsers } = get();
+      getAdminReferralStats: () => {
+        const { referralInvites, referralCodes, allUsers } = get();
 
-        const totalCodes = referralCodes.length;
+        const totalCodes = referralCodes.filter((code) => code.isActive).length;
         const totalInvites = referralInvites.length;
         const totalConversions = referralInvites.filter(
-          (inv) => inv.status === "converted"
+          (i) => i.status === "converted"
         ).length;
         const totalRewards = referralInvites.reduce(
-          (sum, inv) => sum + inv.rewards,
+          (sum, i) => sum + i.rewards,
           0
         );
-        const conversionRate =
-          totalInvites > 0 ? (totalConversions / totalInvites) * 100 : 0;
+        const conversionRate = totalInvites
+          ? (totalConversions / totalInvites) * 100
+          : 0;
 
-        const topReferrers = allUsers
+        // Build per-referrer aggregates
+        const map = new Map<
+          string,
+          {
+            convertedInvites: number;
+            totalInvites: number;
+            totalRewards: number;
+          }
+        >();
+
+        referralInvites.forEach((inv) => {
+          const item = map.get(inv.inviterUserId) ?? {
+            convertedInvites: 0,
+            totalInvites: 0,
+            totalRewards: 0,
+          };
+
+          item.totalInvites += 1;
+          item.totalRewards += inv.rewards;
+          if (inv.status === "converted") item.convertedInvites += 1;
+
+          map.set(inv.inviterUserId, item);
+        });
+
+        const topReferrers = [...map.entries()]
+          .map(([userId, stats]) => {
+            const user = allUsers.find((u) => u.id === userId)!;
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              totalRewards: stats.totalRewards,
+              convertedInvites: stats.convertedInvites,
+              totalInvites: stats.totalInvites,
+              referralCode: user.referralCode,
+              conversionRate: user.conversionRate,
+              status: user.status,
+            };
+          })
           .sort((a, b) => b.totalRewards - a.totalRewards)
-          .slice(0, 5);
+          .slice(0, 10);
 
         return {
           totalCodes,
@@ -372,6 +427,57 @@ export const useReferralStore = create<ReferralState>()(
           conversionRate,
           topReferrers,
         };
+      },
+      blockReferral: (inviteId: string, reason: string) => {
+        set((state) => ({
+          referralInvites: state.referralInvites.map((invite) =>
+            invite.id === inviteId
+              ? {
+                  ...invite,
+                  isBlocked: true,
+                  blockReason: reason,
+                  status: "blocked" as const,
+                }
+              : invite
+          ),
+        }));
+      },
+
+      unblockReferral: (inviteId: string) => {
+        set((state) => ({
+          referralInvites: state.referralInvites.map((invite) =>
+            invite.id === inviteId
+              ? {
+                  ...invite,
+                  isBlocked: false,
+                  blockReason: undefined,
+                  status: "pending" as const,
+                }
+              : invite
+          ),
+        }));
+      },
+
+      banUser: (userId: string, reason: string) => {
+        set((state) => ({
+          allUsers: state.allUsers.map((user) =>
+            user.id === userId ? { ...user, status: "banned" as const } : user
+          ),
+          referralCodes: state.referralCodes.map((code) =>
+            code.userId === userId ? { ...code, isActive: false } : code
+          ),
+        }));
+      },
+
+      unbanUser: (userId: string) => {
+        set((state) => ({
+          allUsers: state.allUsers.map((user) =>
+            user.id === userId ? { ...user, status: "active" as const } : user
+          ),
+          referralCodes: state.referralCodes.map((code) =>
+            code.userId === userId ? { ...code, isActive: true } : code
+          ),
+        }));
       },
 
       updateUserProfile: (updates: Partial<ReferralUser>) => {

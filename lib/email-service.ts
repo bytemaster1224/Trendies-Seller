@@ -110,7 +110,7 @@ export class BrevoEmailService {
       content: `
         <h2>Referral Success!</h2>
         <p>${inviteeName} has successfully joined Trendies using your referral link.</p>
-        <p>You've earned MAD 200 in referral rewards!</p>
+        <p>You've earned MAD 500 in referral rewards!</p>
         <p>Keep sharing and earning more rewards.</p>
       `,
       type: "referral_converted",

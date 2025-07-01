@@ -9,7 +9,8 @@ export interface EmailTemplate {
     | "referral_invite"
     | "referral_verification"
     | "referral_converted"
-    | "referral_reward";
+    | "referral_reward"
+    | "loyalty_redemption";
   metadata?: Record<string, any>;
 }
 
@@ -143,7 +144,7 @@ export class EnhancedBrevoEmailService {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Referral Success - You Earned MAD 200!</title>
+        <title>Referral Success - You Earned MAD 500!</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
           .container { max-width: 600px; margin: 0 auto; background-color: white; }
@@ -168,7 +169,7 @@ export class EnhancedBrevoEmailService {
             <p><strong>${inviteeName}</strong> has successfully joined Trendies using your referral code.</p>
             
             <div class="reward-box">
-              <div class="reward-amount">MAD 200</div>
+              <div class="reward-amount">MAD 500</div>
               <p style="margin: 10px 0 0 0; color: #92400e; font-weight: bold;">Referral Reward Earned!</p>
             </div>
             
@@ -186,9 +187,9 @@ export class EnhancedBrevoEmailService {
 
     return {
       to: inviterEmail,
-      subject: `🎉 Success! ${inviteeName} joined Trendies - You earned MAD 200!`,
+      subject: `🎉 Success! ${inviteeName} joined Trendies - You earned MAD 500!`,
       htmlContent,
-      textContent: `Congratulations! ${inviteeName} joined Trendies using your referral code. You've earned MAD 200!`,
+      textContent: `Congratulations! ${inviteeName} joined Trendies using your referral code. You've earned MAD 500!`,
       type: "referral_converted",
       metadata: { inviterName, inviteeName },
     };
@@ -260,6 +261,98 @@ export class EnhancedBrevoEmailService {
       textContent: `Welcome to Trendies! Your referral using code ${referralCode} from ${inviterName} has been confirmed. You'll receive access to your seller dashboard within 24 hours.`,
       type: "referral_verification",
       metadata: { referralCode, inviterName },
+    };
+  }
+
+  static createLoyaltyRedemptionEmail(
+    userEmail: string,
+    userName: string,
+    rewardName: string,
+    pointsCost: number,
+    remainingPoints: number
+  ): EmailTemplate {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reward Redeemed Successfully</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+          .container { max-width: 600px; margin: 0 auto; background-color: white; }
+          .header { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 40px 20px; text-align: center; }
+          .logo { color: white; font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+          .header-text { color: white; font-size: 18px; opacity: 0.9; }
+          .content { padding: 40px 20px; }
+          .reward-box { background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); padding: 30px; border-radius: 12px; margin: 20px 0; text-align: center; }
+          .reward-name { font-size: 24px; font-weight: bold; color: #92400e; margin-bottom: 10px; }
+          .points-info { background-color: #f0f9ff; border: 2px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .footer { background-color: #1f2937; color: white; padding: 20px; text-align: center; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">trendies</div>
+            <div class="header-text">🎁 Reward Redeemed!</div>
+          </div>
+          
+          <div class="content">
+            <h2>Congratulations, ${userName}!</h2>
+            <p>Your reward has been successfully redeemed and is being processed.</p>
+            
+            <div class="reward-box">
+              <div class="reward-name">${rewardName}</div>
+              <p style="margin: 0; color: #92400e;">Cost: ${pointsCost.toLocaleString()} points</p>
+            </div>
+            
+            <div class="points-info">
+              <h3 style="color: #1d4ed8; margin: 0 0 10px 0;">Points Summary</h3>
+              <p style="margin: 5px 0; color: #1e40af;"><strong>Points Used:</strong> ${pointsCost.toLocaleString()}</p>
+              <p style="margin: 5px 0; color: #1e40af;"><strong>Remaining Balance:</strong> ${remainingPoints.toLocaleString()} points</p>
+            </div>
+            
+            <p>Your reward will be processed within 24-48 hours. You'll receive another email once it's ready for collection or delivery.</p>
+            <p>Thank you for being a valued member of Trendies!</p>
+            
+            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #374151;">What's Next?</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #6b7280;">
+                <li>Our team will review and approve your redemption</li>
+                <li>You'll receive a confirmation email within 24 hours</li>
+                <li>Keep earning points for more exclusive rewards</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>&copy; 2025 Trendies. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+      Congratulations, ${userName}!
+      
+      You've successfully redeemed: ${rewardName}
+      Points Used: ${pointsCost.toLocaleString()}
+      Remaining Balance: ${remainingPoints.toLocaleString()} points
+      
+      Your reward will be processed within 24-48 hours.
+      
+      Thank you for being a valued member of Trendies!
+    `;
+
+    return {
+      to: userEmail,
+      subject: `🎁 Reward Redeemed: ${rewardName} - ${remainingPoints.toLocaleString()} points remaining`,
+      htmlContent,
+      textContent,
+      type: "loyalty_redemption",
+      metadata: { rewardName, pointsCost, remainingPoints },
     };
   }
 
