@@ -212,6 +212,18 @@ export default function ReferralsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Notification */}
+      {notification && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+            notification.type === "success"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold text-black">Referrals</h1>
