@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Brevo from "@getbrevo/brevo";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { inviteEmail, referralCode } = body;
+  const { name, inviteEmail, referralCode } = body;
+
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new Error("BREVO_API_KEY not set");
+
+  const client = new Brevo.TransactionalEmailsApi();
+  client.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
   if (!inviteEmail || !referralCode) {
     return NextResponse.json(
@@ -11,32 +18,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Configure Brevo API key
-
-  const apiKey = process.env.BREVO_API_KEY;
-  const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
-    headers: {
-      "api-key": apiKey!,
-      "Content-Type": "application/json",
-      accept: "application/json",
+  const emailData: Brevo.SendSmtpEmail = {
+    to: [{ email: inviteEmail }],
+    templateId: 46, // Replace with your real template ID
+    params: {
+      name: name,
+      code: referralCode,
+      signupUrl: `https://localhost:3000/signup?code=${referralCode}&email=${inviteEmail}`,
     },
-    body: JSON.stringify({
-      to: [{ email: inviteEmail }],
-      templateId: 6, // Replace with your Brevo template ID
-      params: { REFERRAL_CODE: referralCode },
-      headers: { "X-Mailin-custom": "Referral Email via Next.js" },
-    }),
-  });
+  };
 
-  if (!brevoRes.ok) {
-    const error = await brevoRes.json();
-    console.error("Brevo error:", error);
-    return NextResponse.json(
-      { success: false, message: error.message || "Failed to send email" },
-      { status: 500 }
-    );
+  try {
+    const result = await client.sendTransacEmail(emailData);
+    return NextResponse.json({ success: true, data: result });
+  } catch (error) {
+    console.error("Brevo API error:", error);
+    return NextResponse.json({ error: "Email failed" }, { status: 500 });
   }
-
-  return NextResponse.json({ success: true });
 }
