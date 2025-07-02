@@ -1,8 +1,7 @@
-import type React from "react";
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import { MainLayout } from "@/components/layout/main-layout";
+import "@/styles/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,11 +10,7 @@ export const metadata: Metadata = {
   description: "Manage your seller profile, listings, payouts and performance",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SignupLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -36,11 +31,7 @@ export default function RootLayout({
         }}
       >
         <div className="min-h-screen flex flex-col">
-          <MainLayout>
-            <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              {children}
-            </main>
-          </MainLayout>
+          <main className="flex-1 w-full mx-auto">{children}</main>
         </div>
       </body>
     </html>

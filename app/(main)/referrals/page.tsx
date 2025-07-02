@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,7 @@ export default function ReferralsPage() {
 
     try {
       const result = await sendReferralInvite(inviteEmail);
+      const name = currentUser.name;
       const referralCode = currentUser.referralCode;
       if (result.success && result.invite) {
         const res = await fetch(`api/sendReferral`, {
@@ -76,11 +77,11 @@ export default function ReferralsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            name,
             inviteEmail,
             referralCode,
           }),
         });
-
         const emailTemplate =
           EnhancedBrevoEmailService.createReferralInviteEmail(
             currentUser.name,
@@ -158,7 +159,7 @@ export default function ReferralsPage() {
         );
       await emailService.sendEmail(successEmail);
 
-      showNotification("Referral converted! You earned MAD 200! 🎉", "success");
+      showNotification("Referral converted! You earned MAD 500! 🎉", "success");
     }
   };
 
@@ -201,6 +202,14 @@ export default function ReferralsPage() {
     }
   };
 
+  // Polling for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      useReferralStore.setState((state) => ({ ...state }));
+    }, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Notification */}
@@ -215,12 +224,11 @@ export default function ReferralsPage() {
           {notification.message}
         </div>
       )}
-
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold text-black">Referrals</h1>
         <p className="text-gray-600 text-sm">
-          Invite friends and earn MAD 200 for each successful referral. Share
+          Invite friends and earn MAD 500 for each successful referral. Share
           your unique code and start earning today!
         </p>
       </div>
@@ -363,7 +371,7 @@ export default function ReferralsPage() {
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-sm text-green-800">
-                Share this link or code with friends. You'll earn MAD 200 for
+                Share this link or code with friends. You'll earn MAD 500 for
                 each successful referral.
               </p>
             </div>

@@ -3,7 +3,7 @@ import * as Brevo from "@getbrevo/brevo";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, inviteEmail, referralCode } = body;
+  const { username, toEmail, rewardName, remainingPoints } = body;
 
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new Error("BREVO_API_KEY not set");
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   const client = new Brevo.TransactionalEmailsApi();
   client.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
-  if (!inviteEmail || !referralCode) {
+  if (!toEmail || !rewardName) {
     return NextResponse.json(
       { success: false, message: "Missing fields" },
       { status: 400 }
@@ -19,12 +19,12 @@ export async function POST(req: NextRequest) {
   }
 
   const emailData: Brevo.SendSmtpEmail = {
-    to: [{ email: inviteEmail }],
-    templateId: 46, // Replace with your real template ID
+    to: [{ email: toEmail }],
+    templateId: 47, // Replace with your real template ID
     params: {
-      name: name,
-      code: referralCode,
-      signupUrl: `https://localhost:3000/signup?code=${referralCode}&email=${inviteEmail}`,
+      username,
+      rewardName,
+      remainingPoints,
     },
   };
 

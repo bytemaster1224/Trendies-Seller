@@ -42,7 +42,9 @@ const sidebarNavigation = [
   { name: "Catalog Import", href: "/catalog" },
   { name: "Bonuses", href: "/bonuses" },
   { name: "Referrals", href: "/referrals" },
-  { name: "Admin Panel", href: "/admin/referrals" },
+  { name: "Loyalty Rewards", href: "/loyalty" },
+  { name: "Admin Referrals", href: "/admin/referrals" },
+  { name: "Admin Loyalty", href: "/admin/loyalty" },
 ];
 
 interface MainLayoutProps {

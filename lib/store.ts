@@ -1,81 +1,81 @@
-"use client"
+"use client";
 
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface User {
-  id: string
-  name: string
-  email: string
-  status: "Verified" | "Pro" | "Elite"
-  totalSales: number
-  totalRevenue: number
-  conversionRate: number
-  orders: number
-  referralCode: string
-  currentMonthSales: number
+  id: string;
+  name: string;
+  email: string;
+  status: "Verified" | "Pro" | "Elite";
+  totalSales: number;
+  totalRevenue: number;
+  conversionRate: number;
+  orders: number;
+  referralCode: string;
+  currentMonthSales: number;
 }
 
 export interface Product {
-  id: string
-  title: string
-  brand: string
-  price: number
-  condition: string
-  status: "Live" | "Pending" | "Rejected"
-  image: string
-  category: string
-  dateAdded: string
-  tags: string[]
+  id: string;
+  title: string;
+  brand: string;
+  price: number;
+  condition: string;
+  status: "Live" | "Pending" | "Rejected";
+  image: string;
+  category: string;
+  dateAdded: string;
+  tags: string[];
 }
 
 export interface Payout {
-  id: string
-  orderId: string
-  date: string
-  item: string
-  buyer: string
-  amount: number
-  status: "Paid" | "Pending" | "Processing" | "Failed"
+  id: string;
+  orderId: string;
+  date: string;
+  item: string;
+  buyer: string;
+  amount: number;
+  status: "Paid" | "Pending" | "Processing" | "Failed";
 }
 
 export interface Referral {
-  id: string
-  email: string
-  status: "Pending" | "Converted"
-  dateInvited: string
-  dateConverted?: string
-  earnings: number
+  id: string;
+  email: string;
+  status: "Pending" | "Converted";
+  dateInvited: string;
+  dateConverted?: string;
+  earnings: number;
 }
 
 export interface UploadedFile {
-  id: string
-  name: string
-  size: number
-  type: string
-  uploadDate: string
-  status: "Processing" | "Completed" | "Failed"
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  uploadDate: string;
+  status: "Processing" | "Completed" | "Failed";
 }
 
 interface AppState {
-  user: User
-  products: Product[]
-  payouts: Payout[]
-  referrals: Referral[]
-  uploadedFiles: UploadedFile[]
+  user: User;
+  products: Product[];
+  payouts: Payout[];
+  referrals: Referral[];
+  uploadedFiles: UploadedFile[];
 
   // Actions
-  updateUserSales: (amount: number) => void
-  addProduct: (product: Omit<Product, "id">) => void
-  updateProductStatus: (id: string, status: Product["status"]) => void
-  filterProducts: (filters: Partial<Product>) => Product[]
-  addPayout: (payout: Omit<Payout, "id">) => void
-  addReferral: (email: string) => void
-  convertReferral: (id: string) => void
-  addUploadedFile: (file: Omit<UploadedFile, "id">) => void
-  removeUploadedFile: (id: string) => void
-  checkBadgeUpgrade: () => string | null
-  generateReferralCode: () => string
+  updateUserSales: (amount: number) => void;
+  addProduct: (product: Omit<Product, "id">) => void;
+  updateProductStatus: (id: string, status: Product["status"]) => void;
+  filterProducts: (filters: Partial<Product>) => Product[];
+  addPayout: (payout: Omit<Payout, "id">) => void;
+  addReferral: (email: string) => void;
+  convertReferral: (id: string) => void;
+  addUploadedFile: (file: Omit<UploadedFile, "id">) => void;
+  removeUploadedFile: (id: string) => void;
+  checkBadgeUpgrade: () => string | null;
+  generateReferralCode: () => string;
 }
 
 const initialUser: User = {
@@ -89,7 +89,7 @@ const initialUser: User = {
   orders: 134,
   referralCode: "JOHN2025",
   currentMonthSales: 43700,
-}
+};
 
 const initialProducts: Product[] = [
   {
@@ -140,7 +140,7 @@ const initialProducts: Product[] = [
     dateAdded: "2025-01-12",
     tags: ["Needs Update"],
   },
-]
+];
 
 const initialPayouts: Payout[] = [
   {
@@ -179,7 +179,7 @@ const initialPayouts: Payout[] = [
     amount: 1620,
     status: "Processing",
   },
-]
+];
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -192,43 +192,48 @@ export const useAppStore = create<AppState>()(
 
       updateUserSales: (amount: number) => {
         set((state) => {
-          const newSales = state.user.currentMonthSales + amount
+          const newSales = state.user.currentMonthSales + amount;
           const newUser = {
             ...state.user,
             currentMonthSales: newSales,
             totalRevenue: state.user.totalRevenue + amount,
             totalSales: state.user.totalSales + 1,
-          }
-          return { user: newUser }
-        })
+          };
+          return { user: newUser };
+        });
       },
 
       addProduct: (product) => {
         set((state) => ({
-          products: [...state.products, { ...product, id: Date.now().toString() }],
-        }))
+          products: [
+            ...state.products,
+            { ...product, id: Date.now().toString() },
+          ],
+        }));
       },
 
       updateProductStatus: (id: string, status: Product["status"]) => {
         set((state) => ({
-          products: state.products.map((p) => (p.id === id ? { ...p, status } : p)),
-        }))
+          products: state.products.map((p) =>
+            p.id === id ? { ...p, status } : p
+          ),
+        }));
       },
 
       filterProducts: (filters) => {
-        const { products } = get()
+        const { products } = get();
         return products.filter((product) => {
           return Object.entries(filters).every(([key, value]) => {
-            if (!value) return true
-            return product[key as keyof Product] === value
-          })
-        })
+            if (!value) return true;
+            return product[key as keyof Product] === value;
+          });
+        });
       },
 
       addPayout: (payout) => {
         set((state) => ({
           payouts: [...state.payouts, { ...payout, id: Date.now().toString() }],
-        }))
+        }));
       },
 
       addReferral: (email: string) => {
@@ -243,7 +248,7 @@ export const useAppStore = create<AppState>()(
               earnings: 0,
             },
           ],
-        }))
+        }));
       },
 
       convertReferral: (id: string) => {
@@ -256,57 +261,66 @@ export const useAppStore = create<AppState>()(
                   dateConverted: new Date().toISOString(),
                   earnings: 200,
                 }
-              : r,
+              : r
           ),
-        }))
+        }));
       },
 
       addUploadedFile: (file) => {
         set((state) => ({
-          uploadedFiles: [...state.uploadedFiles, { ...file, id: Date.now().toString() }],
-        }))
+          uploadedFiles: [
+            ...state.uploadedFiles,
+            { ...file, id: Date.now().toString() },
+          ],
+        }));
       },
 
       removeUploadedFile: (id: string) => {
         set((state) => ({
           uploadedFiles: state.uploadedFiles.filter((f) => f.id !== id),
-        }))
+        }));
       },
 
       checkBadgeUpgrade: () => {
-        const { user } = get()
+        const { user } = get();
         const badgeThresholds = {
           Verified: 0,
           Pro: 150000,
           Elite: 500000,
-        }
+        };
 
-        const currentRevenue = user.totalRevenue
+        const currentRevenue = user.totalRevenue;
 
-        if (currentRevenue >= badgeThresholds.Elite && user.status !== "Elite") {
+        if (
+          currentRevenue >= badgeThresholds.Elite &&
+          user.status !== "Elite"
+        ) {
           set((state) => ({
             user: { ...state.user, status: "Elite" },
-          }))
-          return "Elite"
-        } else if (currentRevenue >= badgeThresholds.Pro && user.status === "Verified") {
+          }));
+          return "Elite";
+        } else if (
+          currentRevenue >= badgeThresholds.Pro &&
+          user.status === "Verified"
+        ) {
           set((state) => ({
             user: { ...state.user, status: "Pro" },
-          }))
-          return "Pro"
+          }));
+          return "Pro";
         }
-        return null
+        return null;
       },
 
       generateReferralCode: () => {
-        const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
         set((state) => ({
           user: { ...state.user, referralCode: code },
-        }))
-        return code
+        }));
+        return code;
       },
     }),
     {
       name: "trendies-seller-storage",
-    },
-  ),
-)
+    }
+  )
+);
