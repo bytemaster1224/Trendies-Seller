@@ -20,6 +20,7 @@ export interface ClaimedReward {
   rewardName: string;
   pointsCost: number;
   userId: string;
+  username: string;
   claimedAt: string;
   status: "pending" | "approved" | "delivered" | "cancelled";
   adminNotes?: string;
@@ -28,6 +29,7 @@ export interface ClaimedReward {
 export interface PointsTransaction {
   id: string;
   userId: string;
+  username: string;
   type: "earned" | "redeemed" | "bonus" | "penalty";
   points: number;
   description: string;
@@ -57,9 +59,7 @@ interface LoyaltyState {
     description: string,
     referenceId?: string
   ) => void;
-  redeemReward: (
-    rewardId: string
-  ) => Promise<{
+  redeemReward: (rewardId: string) => Promise<{
     success: boolean;
     message: string;
     claimedReward?: ClaimedReward;
@@ -152,6 +152,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         {
           id: "tx_1",
           userId: "user_1",
+          username: "Stephen Johnson",
           type: "earned",
           points: 500,
           description: "Referral conversion - friend1@example.com",
@@ -161,6 +162,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         {
           id: "tx_2",
           userId: "user_1",
+          username: "Stephen Johnson",
           type: "earned",
           points: 500,
           description: "Referral conversion - friend2@example.com",
@@ -170,6 +172,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         {
           id: "tx_3",
           userId: "user_1",
+          username: "Stephen Johnson",
           type: "redeemed",
           points: -100,
           description: "Redeemed: Free 2h Return",
@@ -186,6 +189,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         const transaction: PointsTransaction = {
           id: `tx_${Date.now()}`,
           userId: get().currentUser.id,
+          username: get().currentUser.name,
           type: points > 0 ? "earned" : "redeemed",
           points,
           description,
@@ -235,6 +239,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
           rewardName: reward.name,
           pointsCost: reward.pointsCost,
           userId: currentUser.id,
+          username: currentUser.name,
           claimedAt: new Date().toISOString(),
           status: "pending",
         };
