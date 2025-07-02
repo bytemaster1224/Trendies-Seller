@@ -134,8 +134,8 @@ const mockRewards: LoyaltyReward[] = [
 
 const mockUser: LoyaltyUser = {
   id: "user_1",
-  email: "stephen@trendies.com",
-  name: "Stephen Johnson",
+  email: "stephenneary747@gmail.com",
+  name: "Stephen Neary",
   totalPoints: 2400,
   lifetimePoints: 3200,
   tier: "Silver",
@@ -152,7 +152,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         {
           id: "tx_1",
           userId: "user_1",
-          username: "Stephen Johnson",
+          username: "Stephen Neary",
           type: "earned",
           points: 500,
           description: "Referral conversion - friend1@example.com",
@@ -162,7 +162,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         {
           id: "tx_2",
           userId: "user_1",
-          username: "Stephen Johnson",
+          username: "Stephen Neary",
           type: "earned",
           points: 500,
           description: "Referral conversion - friend2@example.com",
@@ -172,7 +172,7 @@ export const useLoyaltyStore = create<LoyaltyState>()(
         {
           id: "tx_3",
           userId: "user_1",
-          username: "Stephen Johnson",
+          username: "Stephen Neary",
           type: "redeemed",
           points: -100,
           description: "Redeemed: Free 2h Return",

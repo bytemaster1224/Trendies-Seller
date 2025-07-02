@@ -70,18 +70,18 @@ export default function ReferralsPage() {
       const result = await sendReferralInvite(inviteEmail);
       const name = currentUser.name;
       const referralCode = currentUser.referralCode;
-      const res = await fetch(`api/sendReferral`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          inviteEmail,
-          referralCode,
-        }),
-      });
       if (result.success && result.invite) {
+        const res = await fetch(`api/sendReferral`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            inviteEmail,
+            referralCode,
+          }),
+        });
         const emailTemplate =
           EnhancedBrevoEmailService.createReferralInviteEmail(
             currentUser.name,
