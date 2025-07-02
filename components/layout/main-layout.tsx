@@ -43,7 +43,7 @@ const sidebarNavigation = [
   { name: "Bonuses", href: "/bonuses" },
   { name: "Referrals", href: "/referrals" },
   { name: "Loyalty Rewards", href: "/loyalty" },
-  { name: "Admin Panel", href: "/admin/referrals" },
+  { name: "Admin Referrals", href: "/admin/referrals" },
   { name: "Admin Loyalty", href: "/admin/loyalty" },
 ];
 

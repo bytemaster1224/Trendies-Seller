@@ -31,20 +31,11 @@ export default function LoyaltyPage() {
   } = useLoyaltyStore();
 
   const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
 
   const emailService = EnhancedBrevoEmailService.getInstance();
   const availableRewards = getAvailableRewards();
   const userClaimedRewards = getUserClaimedRewards(currentUser.id);
   const userPointsHistory = getPointsHistory(currentUser.id);
-
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
 
   const handleRedeemReward = async (rewardId: string) => {
     setIsRedeeming(rewardId);
@@ -56,6 +47,18 @@ export default function LoyaltyPage() {
         const reward = rewards.find((r) => r.id === rewardId);
         if (reward) {
           // Send redemption confirmation email
+          const res = await fetch(`api/redeem`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: currentUser.name,
+              toEmail: currentUser.email,
+              rewardName: reward.name,
+              remainingPoints: currentUser.totalPoints - reward.pointsCost,
+            }),
+          });
           const redemptionEmail =
             EnhancedBrevoEmailService.createLoyaltyRedemptionEmail(
               currentUser.email,
@@ -66,13 +69,9 @@ export default function LoyaltyPage() {
             );
           await emailService.sendEmail(redemptionEmail);
         }
-
-        showNotification(result.message, "success");
-      } else {
-        showNotification(result.message, "error");
       }
     } catch (error) {
-      showNotification("Failed to redeem reward. Please try again.", "error");
+      console.error("Error redeeming reward:", error);
     } finally {
       setIsRedeeming(null);
     }

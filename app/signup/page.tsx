@@ -37,7 +37,6 @@ export default function SignupPage() {
         body: JSON.stringify({ email, password, referralCode }),
       });
       const data = await res.json();
-      console.log(data);
       if (res.ok && data.success) {
         setSuccess(true);
         setReferralConverted(!!data.referralConverted);
